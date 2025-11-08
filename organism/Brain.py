@@ -79,7 +79,15 @@ class ChemLobe(Lobe):
         return input
 
 class FoodLobe(Lobe):
-    pass
+    
+    def set_direction(self,direction):
+        """
+        Maybe a tuple of 1 or -1 [1,1] or [-1,1] etc
+        """
+        self._direction = direction
+
+    def set_strength(self, strength):
+        self._strength = strength
 
 class FoodChemLobe(Lobe):
     pass
