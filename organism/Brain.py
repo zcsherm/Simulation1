@@ -6,7 +6,23 @@ Lobe types:
     Chemical food input (single chem from food) Tied to food input, 
     Energy input 
 
-Input vector: Chem0-15, 
+Lobe Header:
+Start code: 
+    8bits (in a larger range than for a gene)
+
+Params: 
+    type: 4 bits (room for more lobe options)
+    layers: 1 bit (val +1) 1-2
+    width: 3 bit(val % 4 +1) 1-4
+    Lobe_param: 4 bits (chem or direction)
+        We need to then get layers * width nodes
+        Each node:
+            function: 2 bits - maybe not, might be better to have a set function for all
+            weights: 6 bits each, need width number of weights ((val-32)/32)->[-1,1]
+        So we need: (layers * width) * (6*width + 2) = 6LW^2 + 2LW bits
+        At max size of 2 layers with width 4: 208 bits <- Kinda large
+            
+
 """
 import numpy as np
 class Node:
@@ -61,10 +77,12 @@ class Lobe:
         else:
             inputs = [self.input_action(debug) for i in range(self._width_layers)]
         for i in range(self._num_layers):
-            if i == self._num_layers - 1:
-                outputs = [0]
-            else:
-                outputs = [0 for _ in range(self._width_layers)]
+            # I believe we can skip this if we allow the final layer to have n outputs and ignore the bottom n-1
+            #if i == self._num_layers - 1:
+            #    outputs = [0]
+            #else:
+            #    outputs = [0 for _ in range(self._width_layers)]
+            outputs = [0 for _ in range(self._width_layers)]
             for j in range(self._width_layers):
                 node = self._hidden[i][j]
                 outs = node.get_output(inputs[j])
@@ -103,13 +121,14 @@ class FoodChemLobe(Lobe):
 
     def input_action(self, food):
         try:
-            return food._chems[self._chem]
+            # Maybe change this to proportion instead of full amount
+            return food._chems[self._chem]/food._size
         except:
             return 0
 
 class EnergyLobe(Lobe):
     def input_action(self):
-        input = self._owner.get_energy()
+        input = self._owner.get_energy_percent()
         return input
 
 def linear(input):
