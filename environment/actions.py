@@ -13,7 +13,7 @@ def turn_right(heading):
     return turn(heading[1],-1*heading[0])
 
 def move_forward(current_space, current_heading):
-    return [current_space[0] + current_heading[0], current_space[1]+current_heading[1]
+    return [current_space[0] + current_heading[0], current_space[1]+current_heading[1]]
 
 def nop():
     return
