@@ -17,13 +17,15 @@ class Node:
         self._bias = bias
 
     def set_weights(self, weights):
+        if not isinstance(weights, list):
+            weights = [weights]
         self._weights = weights
 
     def set_function(self, function):
         self._function = function
 
     def get_output(self, inputs):
-        out = self._function((inputs)+self._bias))
+        out = self._function(inputs+self._bias)
         weighted = [out*weight for weight in self._weights]
         return weighted
 
@@ -48,25 +50,28 @@ class Lobe:
         self._width_layers = num
 
     def add_layer(self, nodes):
-        self._hidden.append(layer)
+        self._hidden.append(nodes)
 
-    def input_action(self):
-        return 1
+    def input_action(self, val = 1):
+        return val
         
-    def get_output(self):
-        inputs = [self.input_action * self._width_layers]
+    def get_output(self, debug=False):
+        if debug is False:
+            inputs = [self.input_action() for i in range(self._width_layers)]
+        else:
+            inputs = [self.input_action(debug) for i in range(self._width_layers)]
         for i in range(self._num_layers):
             if i == self._num_layers - 1:
                 outputs = [0]
             else:
-                outputs = [0 * width_layers]
+                outputs = [0 for _ in range(self._width_layers)]
             for j in range(self._width_layers):
                 node = self._hidden[i][j]
                 outs = node.get_output(inputs[j])
                 for q in range(len(outs)):
                     outputs[q] += outs[q]
             inputs = outputs
-        final_output = self._final.get_outputs(outputs[0])[0]
+        final_output = self._final.get_output(outputs[0])[0]
         return final_output
         
 class ChemLobe(Lobe):
@@ -86,16 +91,27 @@ class FoodLobe(Lobe):
         """
         self._direction = direction
 
-    def set_strength(self, strength):
-        self._strength = strength
+    def input_action(self):
+        food = self._owner.get_food_at_space(self._direction)
+        if food is not None:
+            return self._owner.activate_food_chem_lobes(food)
+        return 0
 
 class FoodChemLobe(Lobe):
-    pass
+    def set_chem(self,chem):
+        self._chem = chem
+
+    def input_action(self, food):
+        try:
+            return food._chems[self._chem]
+        except:
+            return 0
 
 class EnergyLobe(Lobe):
     def input_action(self):
         input = self._owner.get_energy()
-            
+        return input
+
 def linear(input):
     return input
 
@@ -103,7 +119,7 @@ def relu(input):
     return max(0, input)
 
 def sigmoid(input):
-    return 1 / (1+(np.e**-x))
+    return 1 / (1+(np.e**-input))
 
 def tanh(input):
     return 2 * sigmoid(2*input) - 1
