@@ -49,7 +49,7 @@ class World:
                         food = None
                     self.check_organism(occupant)
                     action = occupant.take_action()
-                    self.take_action(action, occupant)
+                    self.handle_action(action, occupant)
 
                 # Decay food or check if food should be placed
                 if food is not None:
@@ -61,7 +61,7 @@ class World:
         """
         Executes a simulation and returns the number of iterations until the organism died
         """
-        while forward_step() is True:
+        while self.forward_step() is True:
             pass
         return self._iterations
         
@@ -100,7 +100,7 @@ class World:
         cell = occupant.get_cell()
         coords = cell.get_coords()
         heading = occupant.get_heading()
-        print(f"Organism executed a {actions[choice]} on turn {self._iterations}"
+        print(f"Organism executed a {ACTIONS[choice]} on turn {self._iterations}")
         if choice == 0:
             new_heading = turn_left(heading)
         elif choice == 1:
@@ -112,8 +112,8 @@ class World:
         if new_heading:
             occupant.set_heading(new_heading)
         if new_position:
-            new_x = new_position[0] % width
-            new_y = new_position[1] % height
+            new_x = new_position[0] % self._width
+            new_y = new_position[1] % self._height
             cell.set_occupant(None)
             self._grid[new_x,new_y].set_occupant(occupant)
             

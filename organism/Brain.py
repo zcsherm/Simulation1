@@ -129,7 +129,7 @@ class Lobe:
             #else:
             #    outputs = [0 for _ in range(self._width_layers)]
             
-            # Setup the outputs for this layer
+            # Set up the outputs for this layer
             outputs = [0 for _ in range(self._width_layers)]
             
             # For each node in this layer....
@@ -276,7 +276,7 @@ class Brain(Lobe):
         """
         Gets the output of the neural net, and returns the index of the highest rated action. This index corresponds to the action to take.
         """
-        outs = get_output()[:4]
+        outs = self.get_output()[:4]
         return outs.index(max(outs))
         
 def linear(input):
