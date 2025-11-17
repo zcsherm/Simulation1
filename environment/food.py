@@ -51,8 +51,8 @@ class Food:
         """
         self._degrade_multiplier = random.randint(FOOD_DECAY_LOWER_BOUND, FOOD_DECAY_UPPER_BOUND)
         chems = random.randint(1,3)
-        chemical = random.randint(0,15)
         for i in range(chems):
+            chemical = random.randint(0,15)
             quant = min(np.random.binomial(100, .04), 15)
             self._chems[chemical]=(Chemical(bin(chemical)))
             self._chems[chemical].increase(quant)
@@ -70,7 +70,8 @@ class Food:
             self._energy -= self._degrade_multiplier/100 * self._size
         self.get_size()
         self.check_death()
-
+    def get_chems(self):
+        
     def get_size(self):
         """
         Fetches the current size of a food item, which is simply the sum of how much of each chemical and energy there is in the item
