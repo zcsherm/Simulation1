@@ -19,6 +19,7 @@ class Body:
         self._chems = {chem: 0 for chem in Chemicals.CHEMS}
         self._concentrations = {chem: 0 for chem in Chemicals.CHEMS}
         self._organs = []
+        self._brain = None
         self._genome = genome
         self._dna_head = None
         self._heading = [1,0]
@@ -32,6 +33,9 @@ class Body:
     def set_position(self, position):
         self._position = position
 
+    def set_brain(self, brain):
+        self._brain = brain
+        
     def add_organ(self, organ):
         """
         Adds a new organ to the creature
@@ -106,7 +110,20 @@ class Body:
         if self._dna_head is None:
             return self._genome
         return self._dna_head.get_entire_genome()
-        
+
+    def take_action(self):
+        """
+        Calls the brain to decide on an action
+        """
+        return self._brain.decide_action()
+    
+    def eat_food(self, food):
+        chems = food.get_chems()
+        for chem in chems:
+            self.add_chemical(chem, chems[chem].get_quantity())
+        energy = food.get_energy()
+        self._add_energy(energy)
+    
     def get_organs(self):
         return self._organs
 
