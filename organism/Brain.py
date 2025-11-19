@@ -31,7 +31,7 @@ params:
     
 """
 import numpy as np
-class Node:
+class BrainNode:
     """
     Represents a single node in the neural net
     """
