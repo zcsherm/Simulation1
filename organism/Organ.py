@@ -11,7 +11,14 @@ class Organ:
         self._owner = owner
         self._health = 1
         self._parameters = []
+        self._energy_capacity = 1
+        
+    def set_energy_capacity(self, number):
+        self._energy_capacity = number
 
+    def get_energy_capacity(self):
+        return self._energy_capacity
+    
     def set_dna_head(self, node):
         self._dna_head = node
 
@@ -53,7 +60,7 @@ class InternalOrgan(Organ):
         self._reaction_rate = rate
         self._reaction_rate_receptors = []
         self._parameters.append(('reaction rate', self.reaction_rate_adjust))
-
+    
     def get_genes(self):
         return self._genes
         
