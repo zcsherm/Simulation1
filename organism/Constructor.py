@@ -13,9 +13,11 @@ GENE_LOWER_LIMIT = 100
 GENE_UPPER_LIMIT = 120
 ORGAN_OPCODES = [0b11111]
 ORGAN_LOWER_LIMIT = 200
-ORGAN_UPPER_LIMIT = 204 
+ORGAN_UPPER_LIMIT = 204
+ENERGY_LOWER_LIMIT = 40
+ENERGY_UPPER_LIMIT = 60
 NORMAL_READ_LENGTH = 8 # used to be 5
-
+ENERGY_AMOUNT = 1
 class Decoder:
     """
     A second decoder for when the genome is stored as linked list
@@ -100,6 +102,10 @@ class Decoder:
                 self.read_organ_data()
                 self._current_gene = None # resets the active gene so that we can use this as aflag as well
             else:
+                # If a certain value is read in the organs non-coding, add a 'fat storage' unit. Like how fatty it is.
+                if self._current_gene == None and self._current_organ:
+                    if ENERGY_LOWER_LIMIT <= int(read_val,2) <= ENERGY_UPPER_LIMIT:
+                        self._current_organ.increase_energy_capacity(ENERGY_AMOUNT)
                 self._current_read += read_val
         if self._current_pos < (len(self._genome)):
             self._current_read += self._genome[self._current_pos:]
