@@ -14,7 +14,7 @@ Params:
     type: 4 bits (room for more lobe options)
     layers: 1 bit (val +1) 1-2
     width: 3 bit(val % 4 +1) 1-4
-    Lobe_param: 4 bits (chem or direction)
+    Lobe_param: 6 bits (chem or direction)
         We need to then get layers * width nodes
         Each node:
             function: 2 bits - maybe not, might be better to have a set function for all
@@ -279,7 +279,7 @@ class Brain(Lobe):
         outs = self.get_output()[:4]
         return outs.index(max(outs))
         
-def linear(input):
+def linr(input):
     return input
 
 def relu(input):
