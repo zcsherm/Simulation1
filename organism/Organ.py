@@ -18,11 +18,14 @@ class Organ:
 
     def get_energy_capacity(self):
         return self._energy_capacity
-    
+
+    def increase_energy_capacity(self, val):
+        self._energy_capacity += val
+        
     def set_dna_head(self, node):
         self._dna_head = node
 
-    def get_dna_hear(self):
+    def get_dna_head(self):
         return self._dna_head
         
     def get_genome(self):
