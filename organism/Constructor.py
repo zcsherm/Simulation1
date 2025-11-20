@@ -215,9 +215,9 @@ class Decoder:
         for i in range((int(left,2) % 2) + 1 + (int(right,2) % 3)):
             val = self.read_at_pos(length = 6)
             read += val
-            chem = self.read_at_pos(length = 4)
+            chem = self.read_at_pos(length = 6)
             read += chem
-            chems.append((int(val,2),int(chem,2)))
+            chems.append((int(val,2),int(chem,2)%20))
         self._current_gene.set_chems_and_coefficients(chems)
         self._current_organ.add_gene(self._current_gene)
         self._current_node.set_params(read)
