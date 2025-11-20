@@ -19,6 +19,15 @@ class Organ:
     def get_energy_capacity(self):
         return self._energy_capacity
 
+    def get_energy_available(self):
+        return self._owner.get_energy()
+
+    def consume_energy(self, amount):
+        self._owner.remove_energy(amount)
+
+    def release_energy(self, amount):
+        self._owner.add_energy(amount)
+
     def increase_energy_capacity(self, val):
         self._energy_capacity += val
         
