@@ -73,6 +73,10 @@ class Body:
             if organ.get_health() > 0:
                 tot += organ.get_energy_capacity()*ORGAN_ENERGY_MULTIPLIER
         self._max_energy = tot
+        return tot
+
+    def get_energy(self):
+        return self._energy
         
     def calc_concentrations(self):
         """
