@@ -4,6 +4,7 @@ Gives rules for genes that govern biochemistry properties. These produce constru
 import utilities
 
 REACTION_MAX = 4
+ENERGY_REACTION_MAX = 2
 
 class BioChemGene:
     """
@@ -189,10 +190,14 @@ class Reaction(BioChemGene):
         """
         for i in range(self._num_of_chems_left):
             chem = self._chems[i]
-            q = self._organ.get_chem_quant(chem[1])
-            print(chem)
-            if q < chem[0]*(REACTION_MAX)/64:
-                return False
+            if chem[1] < 16
+                q = self._organ.get_chem_quant(chem[1])
+                if q < chem[0]*(REACTION_MAX)/64:
+                    return False
+            else:
+                energy_available = self._organ.get_energy_available()
+                if energy_available < self._chems[i][0]*(ENERGY_REACTION_MAX/64):
+                    return False
         return True
 
     def react(self):
@@ -200,13 +205,21 @@ class Reaction(BioChemGene):
         Consumes chemicals on left of equation and produces chems on right.
         """
         for i in range(len(self._chems)):
-            chem = self._chems[i]
-            q = chem[0]*(REACTION_MAX)/64
-            if i < self._num_of_chems_left:
-                self._organ.consume_chemical(chem[1], q)
+            if self._chems[i][1] < 16:
+                chem = self._chems[i]
+                q = chem[0]*(REACTION_MAX)/64
+                if i < self._num_of_chems_left:
+                    self._organ.consume_chemical(chem[1], q)
+                else:
+                    self._organ.release_chemical(chem[1], q)
             else:
-                self._organ.release_chemical(chem[1], q)
-
+                chem = self._chems[i]
+                q = chem[0]*(ENERGY_REACTION_MAX)/64
+                if i < self._num_of_chems_left:
+                    self._organ.consume_energy(chem[1], q)
+                else:
+                    self._organ.release_energy(chem[1], q)
+                    
     def describe(self):
         """
         Outputs all atttributes of the gene in an easy to read manner
@@ -214,17 +227,19 @@ class Reaction(BioChemGene):
         eq = ''
         for i in range(len(self._chems)):
             chem = self._chems[i]
+            if chem[1] < 16:
+                s = f"{chem[0]*REACTION_MAX/64}(Chemical {chem[1]})"
+            else:
+                s = f"{chem[0]*ENERGY_REACTION_MAX/64}(Energy)"
             if i < self._num_of_chems_left:
                 if i == 1:
                     eq += " + "
-                s = f"{chem[0]*REACTION_MAX/64}(Chemical {chem[1]})"
                 eq += s
             else:
                 if i == self._num_of_chems_left:
                     eq += " = "
                 else:
                     eq += " + "
-                s = f"{chem[0]*REACTION_MAX/64}(Chemical {chem[1]})"
                 eq += s
 
         s1 = f"\t\tGene {self._id}:\n"
