@@ -6,8 +6,8 @@ import random
 class MyTestCase(unittest.TestCase):
     def test_something(self):
         # Set output
-        final_node = Node()
-        final_node.set_function(linear)
+        final_node = BrainNode()
+        final_node.set_function(linr)
         final_node.set_weights([1])
         lobe = Lobe(None)
         lobe.set_num_layers(3)
@@ -20,12 +20,12 @@ class MyTestCase(unittest.TestCase):
         for i in range(3):
             layer = []
             for j in range(3):
-                new = Node()
+                new = BrainNode()
                 if i == 2:
                     new.set_weights(random.choice(w1+w2+w3))
                 else:
                     new.set_weights(random.choice([w1,w2,w3]))
-                new.set_function(random.choice([linear,relu,sigmoid,tanh]))
+                new.set_function(random.choice([linr,relu,sigmoid,tanh]))
                 layer.append(new)
             lobe.add_layer(layer)
         print(lobe.get_output(1))

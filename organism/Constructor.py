@@ -17,8 +17,8 @@ ORGAN_LOWER_LIMIT = 200
 ORGAN_UPPER_LIMIT = 204
 ENERGY_LOWER_LIMIT = 40
 ENERGY_UPPER_LIMIT = 60
-LOBE_LOWER = 20
-LOBE_UPPER = 140
+LOBE_LOWER_LIMIT = 20
+LOBE_UPPER_LIMIT = 140
 NORMAL_READ_LENGTH = 8 # used to be 5
 ENERGY_AMOUNT = 1
 class Decoder:
@@ -274,7 +274,7 @@ class Decoder:
             read_val = self.read_at_pos()  # Returns a byte string
             
             # If a lobe start code was encountered, make that lobe
-            if LOBE_LOWER_LIMT <= int(read_val,2) <= LOBE_UPPER_LIMIT:
+            if LOBE_LOWER_LIMIT <= int(read_val,2) <= LOBE_UPPER_LIMIT:
                 self.start_new_node('lobe') # Finish the previously read node, begin a new one
                 self._current_node.set_start(read_val) # Assign the start value
                 self.read_lobe_data() # Start reading it
@@ -371,7 +371,7 @@ class Decoder:
         for i in range(layers):
             val, layer = self.build_neural_net_layer(width)
             read_val += val
-            hidden_layer.append(layer)
+            hidden_layers.append(layer)
         return read_val, hidden_layers
 
     def build_neural_net_layer(self,width):
