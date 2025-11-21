@@ -69,7 +69,7 @@ class Body:
 
     def get_max_energy(self):
         tot = 1
-        for organ in organs:
+        for organ in self._organs:
             if organ.get_health() > 0:
                 tot += organ.get_energy_capacity()*ORGAN_ENERGY_MULTIPLIER
         self._max_energy = tot
@@ -77,7 +77,9 @@ class Body:
 
     def get_energy(self):
         return self._energy
-        
+
+    def get_energy_percent(self):
+        return self._energy/self._max_energy
     def calc_concentrations(self):
         """
         Rechecks the concentrations of chemicals in the body
@@ -181,6 +183,7 @@ class Body:
         print(f"Creature {self._id}:")
         for organ in self._organs:
             organ.describe()
+        self._brain.describe()
 
     def status(self):
         print(f"Creature {self._id}:\n")

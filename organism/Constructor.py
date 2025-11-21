@@ -69,6 +69,7 @@ class Decoder:
         creature = self._current_organism
         self._current_organism = Body()
         self._genome = None
+        self._brain_genome = None
         self._current_pos = 1
         self._current_organ = None
         self._current_gene = None
@@ -261,6 +262,7 @@ class Decoder:
         # Setup a blank brain and a starting node
         if self._brain_genome is None:
             return
+        self._current_pos = 0
         self._current_node = Node()
         self._current_brain = Brain()
         self._current_brain.set_owner(self._current_organism)
@@ -304,11 +306,12 @@ class Decoder:
         read_val += layers
         width = self.read_at_pos(length = 1)
         read_val += width
-        self._current_brain.set_num_layers(layers+2)
-        self._current_brain.set_width_layers(width+4)
+
+        self._current_brain.set_num_layers(int(layers,2)+2)
+        self._current_brain.set_width_layers(int(width,2)+4)
 
         # Get each node of the neural net
-        val, hidden_layers = self.read_and_build_neural_net(layers+2, width+4)
+        val, hidden_layers = self.read_and_build_neural_net(int(layers,2)+2, int(width,2)+4)
         read_val += val
         for layer in hidden_layers:
             self._current_brain.add_layer(layer)
@@ -333,27 +336,29 @@ class Decoder:
         width = self.read_at_pos(length=3)
         read_val += width
         param = self.read_at_pos(length=6)
-        
+        type = int(type,2)
         # Parse the read values
         types = [ChemLobe, FoodLobe, FoodChemLobe, EnergyLobe]
-        lobe = types[type]()
-        lobe.set_width_layers(width%4 + 1)
-        lobe.set_num_layers(layers % 3 + 1)
+        lobe = types[type%4]()
+        lobe.set_owner(self._current_organism)
+        print(int(width,2))
+        print(int(layers,2))
+        lobe.set_width_layers((int(width,2)%4) + 1)
+        lobe.set_num_layers((int(layers,2) % 3) + 1)
 
         # Parse parameters
         if type == 0 or type == 2:
-            lobe.set_chem(param % 16)
+            lobe.set_chem(int(param,2) % 16)
         if type == 1:
-            x  = (param % 8) % 5 -2
-            y = (param // 8) % 5 -2
+            x  = (int(param) % 8) % 5 -2
+            y = (int(param) // 8) % 5 -2
             lobe.set_direction([x,y])
 
         # Build the neuralnetwork
-        val, hidden_layers = self.read_and_build_neural_net(self, layers, width)
+        val, hidden_layers = self.read_and_build_neural_net((int(layers,2) % 3) + 1, (int(width,2)%4) + 1)
         read_val += val
         for layer in hidden_layers:
             lobe.add_layer(layer)
-        self._current_brain.add_lobe(lobe)
         
         if type == 2:
             self._current_brain.add_food_chem_lobe(lobe)
@@ -386,9 +391,9 @@ class Decoder:
             for _ in range(width):
                 weight = self.read_at_pos(length=6)
                 read_val += weight
-                weight = (weight - 32)/32
+                weight = (int(weight,2) - 31)/32
                 weights.append(weight)
-            node.set_function(funcs[func])
+            node.set_function(funcs[int(func,2)])
             node.set_weights(weights)
             layer.append(node)
         return read_val, layer

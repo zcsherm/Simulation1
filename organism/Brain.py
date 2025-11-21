@@ -31,6 +31,7 @@ params:
     
 """
 import numpy as np
+from utilities import generate_id
 class BrainNode:
     """
     Represents a single node in the neural net
@@ -71,9 +72,12 @@ class Lobe:
     """
     Represents a collection of neurons
     """
-    def __init__(self, creature):
+    def __init__(self):
         self._hidden = []
-        self._owner = creature
+        self._id = generate_id()
+
+    def set_owner(self, owner):
+        self._owner = owner
 
     def set_dna_head(self, node):
         self._dna_head = node
@@ -166,7 +170,13 @@ class ChemLobe(Lobe):
         return input
 
     def describe(self):
-        pass
+        """
+        Provide a readout on all aspects of the organ, including parameters and genes
+        """
+        s1 = f"ChemLobe {self._id}:\n"
+        s2 = f"\t This lobe has Width: {self._width_layers}, Layers: {self._num_layers}, Chemical: {self._chem}\n"
+        print(s1, s2)
+
         
 class FoodLobe(Lobe):
     
@@ -186,6 +196,10 @@ class FoodLobe(Lobe):
             return self._owner.activate_food_chem_lobes(food)
         return 0
 
+    def describe(self):
+        s1 = f"FoodLobe {self._id}:\n"
+        s2 = f"\t This lobe has Width: {self._width_layers}, Layers: {self._num_layers}, Direction: {self._direction}\n"
+        print(s1, s2)
 class FoodChemLobe(Lobe):
     """
     Represents a lobe specialized at reading the concentration of a chemical in a food item
@@ -202,9 +216,14 @@ class FoodChemLobe(Lobe):
         """
         try:
             # Maybe change this to proportion instead of full amount
-            return food._chems[self._chem]/food._size
+            return food.get_chems()[self._chem]/food.get_size()
         except:
             return 0
+
+    def describe(self):
+        s1 = f"FoodChemLobe {self._id}:\n"
+        s2 = f"\t This lobe has Width: {self._width_layers}, Layers: {self._num_layers}, Chemical: {self._chem}\n"
+        print(s1, s2)
 
 class EnergyLobe(Lobe):
     """
@@ -217,17 +236,26 @@ class EnergyLobe(Lobe):
         input = self._owner.get_energy_percent()
         return input
 
+    def describe(self):
+        s1 = f"EnergyLobe {self._id}:\n"
+        s2 = f"\t This lobe has Width: {self._width_layers}, Layers: {self._num_layers}\n"
+        print(s1, s2)
+
 class Brain(Lobe):
     """
     Represents an entire brain with a set of lobes. The outputs are tied to the available options of the simulator
     """
-    def __init__(self, owner):
+    def __init__(self):
+        self._hidden = []
+        self._id = generate_id()
         self._lobes = []
         self._food_chem_lobes = []
         self._internal_lobes = []
         self._sensory_lobes = []
-        self._owner = owner
         self._genome = None
+
+    def add_owner(self, owner):
+        self._owner = owner
 
     def add_lobe(self, lobe):
         """
@@ -282,7 +310,15 @@ class Brain(Lobe):
         """
         outs = self.get_output()[:4]
         return outs.index(max(outs))
-        
+
+    def describe(self):
+        s1 = f"Brain {self._id}:\n"
+        s2 = f"\t This brain has Width: {self._width_layers}, Layers: {self._num_layers}\n"
+        s3 = "This brain has the following lobes:"
+        print(s1, s2, s3)
+        for lobe in self._lobes:
+            lobe.describe()
+
 def linr(input):
     return input
 

@@ -190,7 +190,7 @@ class Reaction(BioChemGene):
         """
         for i in range(self._num_of_chems_left):
             chem = self._chems[i]
-            if chem[1] < 16
+            if chem[1] < 16:
                 q = self._organ.get_chem_quant(chem[1])
                 if q < chem[0]*(REACTION_MAX)/64:
                     return False

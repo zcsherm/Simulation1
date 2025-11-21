@@ -195,4 +195,4 @@ class FirstTest(unittest.TestCase):
         Test that organ released chem
         """
         print("=================== TEST 17 ======================")
-        self.assertEqual(self._organism.get_chemical(2), 2)
+        self.assertEqual(self._organism.get_chemical(0), 2)
