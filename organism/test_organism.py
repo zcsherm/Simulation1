@@ -196,3 +196,164 @@ class FirstTest(unittest.TestCase):
         """
         print("=================== TEST 17 ======================")
         self.assertEqual(self._organism.get_chemical(0), 2)
+
+    def test18(self):
+        """
+        Test creatures energy attributes
+        """
+        self.assertEqual(self._organism.get_energy(), 1)
+
+    def test19(self):
+        self.assertEqual(self._organism.get_energy_percent(), 1)
+
+    def test20(self):
+        self._organism.remove_energy(.6)
+        self.assertEqual(self._organism.get_energy(), .4)
+
+    def test21(self):
+        self.assertEqual(self._organism.get_energy_percent(), .4)
+
+    def test22(self):
+        self._organism.remove_energy(.6)
+        self.assertEqual(self._organism.get_energy(), 0)
+
+    def test23(self):
+        self.assertEqual(self._organism.get_energy_percent(),0)
+
+    def test24(self):
+        self._organism.add_energy(3)
+        self.assertEqual(self._organism.get_energy(),1)
+
+    def test25(self):
+        self.assertEqual(self._organism.get_energy_percent(),1)
+
+class SecondTest(unittest.TestCase):
+    """
+    Handles testing the test genome, ensuring that all parts function as intended.
+    """
+    @classmethod
+    def setUpClass(cls):
+        """
+        Initialize the constructor and read the test genome
+        """
+        print("==================== Brain Testing ===================")
+        cls._decoder = Decoder()
+        cls._decoder.set_genome(TEST_GENOME)
+        cls._decoder.set_brain_genome(TEST_BRAIN_GENOME)
+        cls._organism = cls._decoder.read_genome()
+        cls._brain = cls._organism.get_brain()
+
+    def setUp(self):
+        print(f"\n==================== {self._testMethodName} ====================\n")
+
+    def test01(self):
+        """
+        Test that brain lobes read accurately
+        """
+        res = []
+        for lobe in self._brain.get_lobes():
+            res.append(lobe.input_action())
+        self.assertEqual(res,[1,0])
+
+    def test02(self):
+        """
+        Test that brain lobes read accurately when inputs adjusted
+        """
+        res = []
+        self._organism.add_chemical(14, 3)
+        self._organism.add_chemical(3, 2)
+        self._organism.remove_energy(.25)
+        for lobe in self._brain.get_lobes():
+            res.append(lobe.input_action())
+        self.assertEqual(res, [.75, .4])
+        self._organism.rem_chemical(14, 3)
+        self._organism.rem_chemical(3, 2)
+
+    def test03(self):
+        """
+        Test that the brains saved genome is what it is supposed to be
+        """
+        self.assertEqual(self._brain.get_genome(), TEST_BRAIN_GENOME)
+
+    def test04(self):
+        """
+        Test the brains output
+        """
+        outs = self._brain.get_outputs()
+        print(f"With input vector of [1,0], the brain produced these outputs: {outs}")
+        res = self._brain.decide_action()
+        self.assertEqual(res, outs[:4].index(max(outs[:4])))
+
+    def test05(self):
+        """
+        Test that the body can pull the correct action
+        """
+        self.assertEqual(self._organism.take_action(), self._brain.decide_action)
+
+    def test06(self):
+        """
+        Check outputs by varying input values, verify that we get a range of outputs
+        """
+        pass
+
+
+class ThirdTest(unittest.TestCase):
+    """
+    Tests the health module, make sure that health parameters function appropriately
+    """
+    @classmethod
+    def setUpClass(cls):
+        """
+        Initialize the constructor and read the test genome
+        """
+        print("==================== Brain Testing ===================")
+        cls._decoder = Decoder()
+        cls._decoder.set_genome(TEST_GENOME)
+        cls._decoder.set_brain_genome(TEST_BRAIN_GENOME)
+        cls._organism = cls._decoder.read_genome()
+        cls._brain = cls._organism.get_brain()
+        # Add a gene that attaches to organ health and reads chem 2
+        cls._gene = Receptor(cls._organism.get_organs[0], 'receptor')
+        cls._gene.set_activation(sigmoid(40, 100))
+        cls._gene.set_chem(2)
+        cls._gene.set_parameter('health',cls._organism.get_organs[0].health_adjust)
+
+    def setUp(self):
+        print(f"\n==================== {self._testMethodName} ====================\n")
+
+    def test01(self):
+        for organ in self._organism.get_organs()
+            print(f"Organ {organ.get_id()} has health: {organ.get_health()}")
+
+    def test02(self):
+        self._organism.check_organ_health()
+        print(f"Organism has health of: {self._organism.get_health()}")
+
+    def test03(self):
+        """
+        Update organs
+        """
+        for organ in self._organism.get_organs():
+            organ.update_params()
+            print(f"Organ {organ.get_id()} has health: {organ.get_health()}")
+
+    def test04(self):
+        self._organism.check_organ_health()
+        print(f"Organism has health of: {self._organism.get_health()}")
+
+    def test05(self):
+        self._organism.get_organs[0].add_gene(self._gene)
+        for i in range(10):
+            for organ in self._organism.get_organs():
+                organ.update_params()
+                print(f"Organ {organ.get_id()} has health: {organ.get_health()}")
+        self._organism.add_chemical(2,1)
+        # Test when chem 2 is at 1
+        for i in range(10):
+            for organ in self._organism.get_organs():
+                organ.update_params()
+                print(f"Organ {organ.get_id()} has health: {organ.get_health()}")
+
+
+    def test06(self):
+        pass
