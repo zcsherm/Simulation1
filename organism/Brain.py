@@ -146,7 +146,8 @@ class Lobe:
         # For a generic lobe, we only have 1 output, so we grab the topmost output.
         final_output = self._final.get_output(outputs[0])[0]
         return final_output
-        
+    
+    
 class ChemLobe(Lobe):
     """
     Represents a lobe specialized in reading chemical concentrations in the body
@@ -164,6 +165,9 @@ class ChemLobe(Lobe):
         input = self._owner.get_concentration(self._chem)
         return input
 
+    def describe(self):
+        pass
+        
 class FoodLobe(Lobe):
     
     def set_direction(self,direction):
