@@ -159,6 +159,7 @@ class Cell:
 
     def set_occupant(self, occupant):
         self._occupant = occupant
+        occupant.set_cell(self)
 
     def set_food(self, food):
         self._food = food
