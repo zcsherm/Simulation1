@@ -37,9 +37,10 @@ class Body:
         self._brain = None
         self._genome = genome
         self._dna_head = None
-        self._heading = [1,0]
+        self._heading = [0,1]
         self._energy = 1
         self._max_energy = 1
+        self._cell = None
 
     def set_grid(self, grid):
         self._grid = grid
@@ -87,6 +88,9 @@ class Body:
     def get_energy_percent(self):
         return self._energy/self._max_energy
 
+    def get_heading(self):
+        return self._heading
+        
     def calc_concentrations(self):
         """
         Rechecks the concentrations of chemicals in the body
@@ -192,6 +196,24 @@ class Body:
     def get_health(self):
         return self._health
 
+    def set_cell(self, cell):
+        """
+        Set the gridpoint this creature exists on
+        """
+        self._cell = cell
+        
+    def get_food_at_space(self, space):
+        """
+        Return a food item located at a space relative to this creatures heading.
+        """
+        if self._cell is None:
+            return None
+        # Transform the space according to the creatures heading
+        new_x = space[1]*self._heading[0]+space[0]*self._heading[1]
+        new_y = space[1]*self._heading[1]-space[0]*self._heading[0]
+        current_space = self._cell.get_coords()
+        return self._cell.get_food_at([current_space[0]+new_x,current_space[1]+new_y])
+        
     def describe(self):
         print(f"Creature {self._id}:")
         for organ in self._organs:
