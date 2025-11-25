@@ -61,16 +61,17 @@ class World:
 
                 # Decay food or check if food should be placed
                 if food is not None:
-                    food.decay()
+                    food.degrade()
                 else:
                     self.place_food(i,j)
     
-    def run_sim(self):
+    def run_sim(self, pause_interval = 1, max = None):
         """
         Executes a simulation and returns the number of iterations until the organism died
         """
         while self.forward_step() is True:
-            pass
+            if self._iterations % pause_interval == 0:
+                input("Press Enter to continue the simulation")
         return self._iterations
         
     def print_grid(self):
