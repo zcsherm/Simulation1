@@ -65,6 +65,7 @@ class Decoder:
             else:
                 self._current_organ.set_dna_head(self._current_node)
             self._current_organism.add_organ(self._current_organ)
+        self._current_read=b''
         self.read_brain()
         creature = self._current_organism
         self._current_organism = Body()
@@ -336,6 +337,7 @@ class Decoder:
         width = self.read_at_pos(length=3)
         read_val += width
         param = self.read_at_pos(length=6)
+        read_val += param
         type = int(type,2)
         # Parse the read values
         types = [ChemLobe, FoodLobe, FoodChemLobe, EnergyLobe]
@@ -366,7 +368,7 @@ class Decoder:
             self._current_brain.add_sensory_lobe(lobe)
         else:
             self._current_brain.add_internal_lobe(lobe)
-        
+        self._current_lobe = lobe
         self._current_node.set_params(read_val)
 
     

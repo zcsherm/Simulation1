@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sb
 import matplotlib.pyplot as plt
+
+from organism.BioChemGene import Receptor
 from utilities import *
 import Constructor
 from Constructor import Decoder
@@ -201,20 +203,21 @@ class FirstTest(unittest.TestCase):
         """
         Test creatures energy attributes
         """
-        self.assertEqual(self._organism.get_energy(), 1)
+        self._organism.add_energy(20)
+        self.assertEqual(self._organism.get_energy(), 1.4)
 
     def test19(self):
         self.assertEqual(self._organism.get_energy_percent(), 1)
 
     def test20(self):
-        self._organism.remove_energy(.6)
-        self.assertEqual(self._organism.get_energy(), .4)
+        self._organism.remove_energy(.7)
+        self.assertEqual(self._organism.get_energy(), .7)
 
     def test21(self):
-        self.assertEqual(self._organism.get_energy_percent(), .4)
+        self.assertEqual(self._organism.get_energy_percent(), .5)
 
     def test22(self):
-        self._organism.remove_energy(.6)
+        self._organism.remove_energy(.8)
         self.assertEqual(self._organism.get_energy(), 0)
 
     def test23(self):
@@ -222,7 +225,7 @@ class FirstTest(unittest.TestCase):
 
     def test24(self):
         self._organism.add_energy(3)
-        self.assertEqual(self._organism.get_energy(),1)
+        self.assertEqual(self._organism.get_energy(),1.4)
 
     def test25(self):
         self.assertEqual(self._organism.get_energy_percent(),1)
@@ -251,6 +254,7 @@ class SecondTest(unittest.TestCase):
         Test that brain lobes read accurately
         """
         res = []
+        self._organism.add_energy(12)
         for lobe in self._brain.get_lobes():
             res.append(lobe.input_action())
         self.assertEqual(res,[1,0])
@@ -260,26 +264,32 @@ class SecondTest(unittest.TestCase):
         Test that brain lobes read accurately when inputs adjusted
         """
         res = []
+        self._organism.add_energy(12)
         self._organism.add_chemical(14, 3)
-        self._organism.add_chemical(3, 2)
-        self._organism.remove_energy(.25)
+        self._organism.add_chemical(2, 2)
+        self._organism.remove_energy(.14)
+        self._organism.calc_concentrations()
         for lobe in self._brain.get_lobes():
             res.append(lobe.input_action())
-        self.assertEqual(res, [.75, .4])
+        self.assertAlmostEqual(res[0],.9)
+        self.assertAlmostEqual(res[1],.4)
         self._organism.rem_chemical(14, 3)
-        self._organism.rem_chemical(3, 2)
+        self._organism.rem_chemical(2, 2)
+        self._organism.add_energy(12)
 
     def test03(self):
         """
         Test that the brains saved genome is what it is supposed to be
         """
+        print(len(self._brain.get_genome()))
+        print(len(TEST_BRAIN_GENOME))
         self.assertEqual(self._brain.get_genome(), TEST_BRAIN_GENOME)
 
     def test04(self):
         """
         Test the brains output
         """
-        outs = self._brain.get_outputs()
+        outs = self._brain.get_output()
         print(f"With input vector of [1,0], the brain produced these outputs: {outs}")
         res = self._brain.decide_action()
         self.assertEqual(res, outs[:4].index(max(outs[:4])))
@@ -288,14 +298,22 @@ class SecondTest(unittest.TestCase):
         """
         Test that the body can pull the correct action
         """
-        self.assertEqual(self._organism.take_action(), self._brain.decide_action)
+        self.assertEqual(self._organism.take_action(), self._brain.decide_action())
 
     def test06(self):
         """
         Check outputs by varying input values, verify that we get a range of outputs
         """
-        pass
-
+        self._organism.add_energy(12)
+        self._organism.add_chemical(2, 1)
+        self._organism.calc_concentrations()
+        for i in range(10):
+            self._organism.add_chemical(14, .2)
+            self._organism.calc_concentrations()
+            self._organism.remove_energy(.08)
+            print(self._brain.get_output())
+            chosen = self._organism.take_action()
+            print(f"With inputs of [{1-(.08*(i+1))},{1/(1+(.2*(i+1)))}] produced action: {chosen}")
 
 class ThirdTest(unittest.TestCase):
     """
@@ -313,16 +331,16 @@ class ThirdTest(unittest.TestCase):
         cls._organism = cls._decoder.read_genome()
         cls._brain = cls._organism.get_brain()
         # Add a gene that attaches to organ health and reads chem 2
-        cls._gene = Receptor(cls._organism.get_organs[0], 'receptor')
-        cls._gene.set_activation(sigmoid(40, 100))
-        cls._gene.set_chem(2)
-        cls._gene.set_parameter('health',cls._organism.get_organs[0].health_adjust)
+        cls._gene = Receptor(cls._organism.get_organs()[0], 'receptor')
+        cls._gene.set_activation('sigmoid',sigmoid(40, 100))
+        cls._gene.set_chemical(2)
+        cls._gene.set_parameter('health',cls._organism.get_organs()[0].health_adjust)
 
     def setUp(self):
         print(f"\n==================== {self._testMethodName} ====================\n")
 
     def test01(self):
-        for organ in self._organism.get_organs()
+        for organ in self._organism.get_organs():
             print(f"Organ {organ.get_id()} has health: {organ.get_health()}")
 
     def test02(self):
@@ -342,11 +360,12 @@ class ThirdTest(unittest.TestCase):
         print(f"Organism has health of: {self._organism.get_health()}")
 
     def test05(self):
-        self._organism.get_organs[0].add_gene(self._gene)
+        self._organism.get_organs()[0].add_gene(self._gene)
         for i in range(10):
             for organ in self._organism.get_organs():
-                organ.update_params()
+                self._organism.check_organ_health()
                 print(f"Organ {organ.get_id()} has health: {organ.get_health()}")
+                print(f"Organism has health of: {self._organism.get_health()}")
         self._organism.add_chemical(2,1)
         # Test when chem 2 is at 1
         for i in range(10):

@@ -100,6 +100,8 @@ class World:
         cell = occupant.get_cell()
         coords = cell.get_coords()
         heading = occupant.get_heading()
+        new_position = False
+        new_heading = False
         print(f"Organism executed a {ACTIONS[choice]} on turn {self._iterations}")
         if choice == 0:
             new_heading = turn_left(heading)

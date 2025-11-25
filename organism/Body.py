@@ -80,6 +80,7 @@ class Body:
 
     def get_energy_percent(self):
         return self._energy/self._max_energy
+
     def calc_concentrations(self):
         """
         Rechecks the concentrations of chemicals in the body
@@ -156,11 +157,14 @@ class Body:
         self._energy = min(self._max_energy, self._energy + amount)
 
     def remove_energy(self, amount):
-        self._energy -= amount
+        self._energy = max(self._energy-amount,0)
         
     def get_organs(self):
         return self._organs
-    
+
+    def get_brain(self):
+        return self._brain
+
     def check_alive(self):
         self.check_organ_health()
         if self._health < HEALTH_DEATH_THRESHOLD:
@@ -178,7 +182,10 @@ class Body:
             else:
                 o_healths += health_function(o_health)
         self._health = o_healths/len(self._organs)
-        
+
+    def get_health(self):
+        return self._health
+
     def describe(self):
         print(f"Creature {self._id}:")
         for organ in self._organs:

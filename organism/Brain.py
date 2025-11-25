@@ -148,7 +148,7 @@ class Lobe:
             inputs = outputs
 
         # For a generic lobe, we only have 1 output, so we grab the topmost output.
-        final_output = self._final.get_output(outputs[0])[0]
+        final_output = outputs[0]
         return final_output
     
     
@@ -274,6 +274,9 @@ class Brain(Lobe):
     def add_sensory_lobe(self,lobe):
         self.add_lobe(lobe)
         self._sensory_lobes.append(lobe)
+
+    def get_lobes(self):
+        return self._lobes
 
     def input_action(self, val=None):
         """
