@@ -1,9 +1,13 @@
 from actions import *
+from food import *
+import random
 HEIGHT = 30
 WIDTH = 30
 CELLS = HEIGHT * WIDTH
 DIRECTIONS =[(1,0),(0,1),(-1,0),(0,-1)]
 ACTIONS = ["Left Turn", "Right Turn", "Move Forward", "Do Nothing"]
+FOOD_SEED_CHANCE = .15
+FOOD_STEP_CHANCE = .0005
 
 class World:
     
@@ -29,7 +33,11 @@ class World:
         """
         Seed the initial grid with a number of food items
         """
-        pass
+        for i in range(len(self._grid)):
+            for q in range(len(self._grid[i])):
+                if random.random() < FOOD_SEED_CHANCE:
+                    self._grid[i][q].set_food(Food())
+                    
     
     def progress_sim(self):
         """
@@ -55,7 +63,7 @@ class World:
                 if food is not None:
                     food.decay()
                 else:
-                    self.place_food()
+                    self.place_food(i,j)
     
     def run_sim(self):
         """
@@ -124,13 +132,19 @@ class World:
         """
         Check for organism death, reduce energy, fire bodyparts
         """
-        pass
+        # Fire the organisms body parts
+        # Reduce energy accordingly
+        organism.activate_organs()
+        alive = organism.check_alive()
+        if not alive:
+            self._organism_death = True
 
-    def place_food(self):
+    def place_food(self,row,column):
         """
         Roll to see if new food should be placed.
         """
-        pass
+        if random.random() < FOOD_STEP_CHANCE:
+            self._grid[row][column].set_food(Food())
 
 class Cell:
     def __init__(self, grid, coords):
