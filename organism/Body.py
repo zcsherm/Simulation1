@@ -10,6 +10,9 @@ import numpy as np
 ORGAN_ENERGY_MULTIPLIER = .4
 HEALTH_DEATH_THRESHOLD = .05
 
+def energy_drain_function(val):
+    return (1/50 * val) ** 3
+    
 def health_function(val):
     """
     Maps organ health to overall creature health. Low health organs are very detrimental.
@@ -65,6 +68,9 @@ class Body:
             roll = random.random()
             if roll <= organ.get_act_rate():
                 organ.activate_organ()
+                gene_count = len(organ.get_genes())
+                fat_cells = organ.get_energy_capacity()
+                self._remove_energy(energy_drain_function(gene_count+fat_cells))
         self.calc_concentrations()
 
     def get_max_energy(self):
