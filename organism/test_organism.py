@@ -360,19 +360,53 @@ class ThirdTest(unittest.TestCase):
         print(f"Organism has health of: {self._organism.get_health()}")
 
     def test05(self):
+        self._organism.describe()
         self._organism.get_organs()[0].add_gene(self._gene)
+        print(self._gene.read_input())
+        self._organism.add_chemical(2, 1)
+        self._organism.calc_concentrations()
+        print(self._gene.read_input())
+        print(self._organism.get_concentration(2))
+        self._gene.describe()
         for i in range(10):
             for organ in self._organism.get_organs():
+                organ.activate_organ()
+                self._organism.calc_concentrations()
+                self._organism.check_organ_health()
+                print(self._gene.read_input())
+                print(f"Organ {organ.get_id()} has health: {organ.get_health()}")
+                print(f"Organism has health of: {self._organism.get_health()}")
+
+        for i in range(10):
+            for organ in self._organism.get_organs():
+                self._organism.add_chemical(1,9)
+                self._organism.calc_concentrations()
+                organ.activate_organ()
                 self._organism.check_organ_health()
                 print(f"Organ {organ.get_id()} has health: {organ.get_health()}")
                 print(f"Organism has health of: {self._organism.get_health()}")
-        self._organism.add_chemical(2,1)
-        # Test when chem 2 is at 1
-        for i in range(10):
-            for organ in self._organism.get_organs():
-                organ.update_params()
-                print(f"Organ {organ.get_id()} has health: {organ.get_health()}")
-
 
     def test06(self):
         pass
+
+class FourthTest(unittest.TestCase):
+    """
+    Tests the health module, make sure that health parameters function appropriately
+    """
+    @classmethod
+    def setUpClass(cls):
+        """
+        Initialize the constructor and read the test genome
+        """
+        print("==================== Brain Testing ===================")
+        cls._decoder = Decoder()
+        cls._decoder.set_genome(generate_genome(5000))
+        cls._decoder.set_brain_genome(generate_genome(5000))
+        cls._organism = cls._decoder.read_genome()
+        cls._brain = cls._organism.get_brain()
+
+    def setUp(self):
+        print(f"\n==================== {self._testMethodName} ====================\n")
+
+    def test01(self):
+        self._organism.describe()

@@ -338,10 +338,10 @@ class Decoder:
         read_val += width
         param = self.read_at_pos(length=6)
         read_val += param
-        type = int(type,2)
+        typer = int(type,2)
         # Parse the read values
         types = [ChemLobe, FoodLobe, FoodChemLobe, EnergyLobe]
-        lobe = types[type%4]()
+        lobe = types[typer%4]()
         lobe.set_owner(self._current_organism)
         print(int(width,2))
         print(int(layers,2))
@@ -349,9 +349,9 @@ class Decoder:
         lobe.set_num_layers((int(layers,2) % 3) + 1)
 
         # Parse parameters
-        if type == 0 or type == 2:
+        if typer%4 == 0 or typer%4 == 2:
             lobe.set_chem(int(param,2) % 16)
-        if type == 1:
+        if typer%4 == 1:
             x  = (int(param) % 8) % 5 -2
             y = (int(param) // 8) % 5 -2
             lobe.set_direction([x,y])

@@ -155,7 +155,7 @@ class InternalOrgan(Organ):
         elif type == 'emitter':
             gene.release_chemical()
         elif type == 'reaction':
-            if gene.check_requirements():
+            if gene.check_for_requirements():
                 gene.react()
 
     def update_params(self):
