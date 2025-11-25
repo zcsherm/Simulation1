@@ -70,6 +70,9 @@ class World:
         Executes a simulation and returns the number of iterations until the organism died
         """
         while self.forward_step() is True:
+            if max is not None:
+                if self._iterations >= max:
+                    return self._iterations
             if self._iterations % pause_interval == 0:
                 input("Press Enter to continue the simulation")
         return self._iterations
@@ -169,3 +172,5 @@ class Cell:
     def get_coords(self):
         return self._coords
         
+    def get_food_at(self, position):
+        return self._grid[position[0]][position[1]].get_food()
