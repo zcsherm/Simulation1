@@ -11,6 +11,7 @@ def food_decay_rate(principal):
     P is initial loaded in amount
     and m is a value between 1.001 and 1.11
     """
+    
     pass
     
 class Chemical:
