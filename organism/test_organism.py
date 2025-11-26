@@ -11,6 +11,7 @@ from utilities import *
 import Constructor
 from Constructor import Decoder
 from sample import *
+from Reproduction import *
 
 class FirstTest(unittest.TestCase):
     """
@@ -391,7 +392,7 @@ class ThirdTest(unittest.TestCase):
 
 class FourthTest(unittest.TestCase):
     """
-    Tests the health module, make sure that health parameters function appropriately
+    Tests reproduction
     """
     @classmethod
     def setUpClass(cls):
@@ -410,3 +411,28 @@ class FourthTest(unittest.TestCase):
 
     def test01(self):
         self._organism.describe()
+
+    def test02(self):
+        child = sexual_reproduction(self._organism, self._organism)
+        child.describe()
+
+    def test03(self):
+        lengths_genome = [len(self._organism.get_genome())]
+        lengths_brain = [len(self._organism.get_brain().get_genome())] 
+        child = sexual_reproduction(self._organism, self._organism)
+        new_child = sexual_reproduction(self._organism, child)
+        lengths_genome.append(child.get_genome())
+        lengths_genome.append(new_child.get_genome())
+        lengths_brain.append(child.get_brain()get_genome())
+        lengths_brain.append(new_child.get_brain().get_genome())
+        for i in range(10):
+            c = sexual_reproduction(child, new_child)
+            child = new_child
+            new_child = c
+            lengths_genome.append(child.get_genome())
+            lengths_genome.append(new_child.get_genome())
+            lengths_brain.append(child.get_brain()get_genome())
+            lengths_brain.append(new_child.get_brain().get_genome())
+        # Might be good to chart this
+        print(f"Genome lengths: {lengths_genome}")
+        print(f"Brain lengths: {lengths_brain}")

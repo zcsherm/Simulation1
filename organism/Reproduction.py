@@ -7,10 +7,12 @@ from utilities import *
 from Genome import *
 import random
 
-MUTATION_RATE = .01
+MUTATION_RATE = .002
 START_FLIP_DIVISOR = 20
 PARAM_FLIP_DIVISOR = 4
 NON_CODING_DIVISOR = 1
+
+CROSSOVER_RATE = .1
 
 # Genome parsing - possible combine this with decoder, that would mean genome is read once. Maybe having the Genome parsed into a directed graph would be easier?
 
@@ -232,3 +234,59 @@ def point_deletion(organism, mutation_rate= MUTATION_RATE):
     deletes a number of bits, preserve reading frame
     """
     pass
+
+def cross_over(male, female, crossover_chance = CROSSOVER_RATE):
+    male_node = male.get_dna_head()
+    female_node = female.get_dna_head()
+    child_genome = b''
+    current = 'female' if random.random() < .5 else 'male'
+    if current == 'female':
+        child_genome += female_node.get_structure_genome()
+    else:
+        child_genome += male_node.get_structure_genome()
+    female_node = female_node.next
+    male_node = male_node.next
+    while female_node or male_node:
+        if current == 'female' and female_node is None:
+            break
+        if current == 'male' and male_node is None:
+            break
+        if male_node is not None and female_node is not None:
+            # Swapover chance
+            if random.random() < CROSSOVER_RATE:
+                if current == 'female':
+                    current = 'male'
+                else: 
+                    current = 'female'
+
+        # get the current nodes structure
+        if current == 'female':
+            child_genome += female_node.get_structure_genome()
+        else:
+            child_genome += male_node.get_structure_genome()
+        female_node = female_node.next
+        male_node = male_node.next
+    return child_genome
+
+def sexual_reproduction(parent_one, parent_two):
+    child_genome_organs = cross_over(parent_one, parent_two)
+    child_genome_brain = cross_over(parent_one.get_brain(),parent_two.get_brain())
+    d = Decoder()
+    d.set_genome(child_genome_organs)
+    d.set_brain_genome(child_genome_brain)
+    default_child = d.read_genome()
+    child_genome_organs = mutation_suite(default_child)
+    child_genome_brain = muration_suite(default_child.get_brain())
+    d = Decoder()
+    d.set_genome(child_genome_organs)
+    d.set_brain_genome(child_genome_brain)
+    child = d.read_genome()
+    return child
+
+def mutation_suite(offspring):
+    bit_flip_in_params(offspring, MUTATION_RATE)
+    bit_flip_weighted(offspring, MUTATION_RATE/4)
+    retrotransposition(offspring, MUTATION_RATE)
+    deletion(offspring, MUTATION_RATE)
+    duplication(offspring, MUTATION_RATE)
+    return offspring.get_genome()

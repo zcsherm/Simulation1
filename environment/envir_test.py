@@ -69,8 +69,8 @@ class FirstTest(unittest.TestCase):
         self.assertTrue(new_heading == [-1,0])
 
         # Test turning right twice
-        self._world.handle_action_action(org,1)
-        self._world.handle_action_action(org,1)
+        self._world.handle_action(org,1)
+        self._world.handle_action(org,1)
         energy = org.get_energy()
         print(f"Current Energy {energy}")
         new_heading = org.get_heading()
@@ -78,7 +78,7 @@ class FirstTest(unittest.TestCase):
         self._world.print_grid()
 
         # Test moving forward
-        self._world.handle_action_action(org,2)
+        self._world.handle_action(org,2)
         energy = org.get_energy()
         self._world.print_grid()
         print(f"Current Energy {energy}")
@@ -88,4 +88,14 @@ class FirstTest(unittest.TestCase):
         # Test letting the organism eat food
         food = Food()
         org.get_cell().set_food(food)
+        org.eat_food(org.get_cell().get_food())
+        print(org.chems)
+        self.assertTrue(org.get_cell().get_food() is None)
+
+        # Test the organism going off the edge of the board
+        self._world.handle_action(org,0)
+        self._world.handle_action(org,2)
+        self._world.print_grid()
+        new_pos = org.get_coords()
+        print(f"New coordinates: {new_pos}")
         
