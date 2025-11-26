@@ -429,9 +429,7 @@ class FourthTest(unittest.TestCase):
             c = sexual_reproduction(child, new_child)
             child = new_child
             new_child = c
-            lengths_genome.append(child.get_genome())
             lengths_genome.append(new_child.get_genome())
-            lengths_brain.append(child.get_brain()get_genome())
             lengths_brain.append(new_child.get_brain().get_genome())
         # Might be good to chart this
         print(f"Genome lengths: {lengths_genome}")
