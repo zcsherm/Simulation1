@@ -3,6 +3,7 @@ from world import *
 from actions import *
 from food import *
 from utilities import *
+from decoder import Decoder
 from sample import *
 
 class FirstTest(unittest.TestCase):
@@ -16,6 +17,7 @@ class FirstTest(unittest.TestCase):
         """
         print("==================== World.py testing ===================")
         cls._world = World()
+        cls._grid = cls._world.get_grid()
 
     def setUp(self):
         print(f"\n==================== {self._testMethodName} ====================\n")
@@ -47,7 +49,43 @@ class FirstTest(unittest.TestCase):
 
     def test04(self):
         """
-        Test adding in a critter?
+        Breaking my own rules and setting multiple asserts into this one. Testing basic actions of critter in environ
         """
-        pass
+        # Create the organism
+        d = Decoder()
+        d.set_genome(TEST_GENOME)
+        d.set_brain_genome(TEST_BRAIN_GENOME)
+        org = d.read_genome()
+        energy = org.get_energy()
+        print(f"Current Energy {energy}")
+
+        # Place the organism in the world and test turning left
+        self._world.place_organism(org,0,0)
+        self._world.print_grid()
+        self._world.handle_action(org, 0)
+        energy = org.get_energy()
+        print(f"Current Energy {energy}")
+        new_heading = org.get_heading()
+        self.assertTrue(new_heading == [-1,0])
+
+        # Test turning right twice
+        self._world.handle_action_action(org,1)
+        self._world.handle_action_action(org,1)
+        energy = org.get_energy()
+        print(f"Current Energy {energy}")
+        new_heading = org.get_heading()
+        self.assertEqual(new_heading, [1,0])
+        self._world.print_grid()
+
+        # Test moving forward
+        self._world.handle_action_action(org,2)
+        energy = org.get_energy()
+        self._world.print_grid()
+        print(f"Current Energy {energy}")
+        new_pos = org.get_coords()
+        print(f"New coordinates: {new_pos}")
+
+        # Test letting the organism eat food
+        food = Food()
+        org.get_cell().set_food(food)
         

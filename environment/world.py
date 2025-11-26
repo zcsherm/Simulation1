@@ -155,11 +155,17 @@ class World:
         if random.random() < FOOD_STEP_CHANCE:
             self._grid[row][column].set_food(Food())
 
+    def place_organism(self,organism, x=0,y=0):
+        self._grid[x][y].set_occupant(organism)
+
+    def get_food_at(self, position):
+        return self._grid[position[0]][position[1]].get_food()
+        
 class Cell:
-    def __init__(self, grid, coords):
+    def __init__(self, world, coords):
         self._occupant = None
         self._food = None
-        self._grid = grid
+        self._world = world
         self._coords = coords
 
     def set_occupant(self, occupant):
@@ -179,4 +185,4 @@ class Cell:
         return self._coords
         
     def get_food_at(self, position):
-        return self._grid[position[0]][position[1]].get_food()
+        return self._world.get_food_at(position)
