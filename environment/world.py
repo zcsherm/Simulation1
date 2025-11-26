@@ -114,14 +114,19 @@ class World:
         heading = occupant.get_heading()
         new_position = False
         new_heading = False
+        energy_drain = 0
         print(f"Organism executed a {ACTIONS[choice]} on turn {self._iterations}")
         if choice == 0:
             new_heading = turn_left(heading)
+            energy_drain = (occupant.get_max_energy()-1)/.4
         elif choice == 1:
             new_heading = turn_right(heading)
+            energy_drain = (occupant.get_max_energy()-1)/.4
         elif choice == 2:
             new_position = move_forward(coords, heading)
+            energy_drain = (occupant.get_max_energy()-1)/.4 + len(occupant.get_organs())
         elif choice == 3:
+            energy_drain = 0
             pass
         if new_heading:
             occupant.set_heading(new_heading)
@@ -130,7 +135,7 @@ class World:
             new_y = new_position[1] % self._height
             cell.set_occupant(None)
             self._grid[new_x,new_y].set_occupant(occupant)
-            
+        occupant.remove_energy(energy_drain)
             
     def check_organism(self, organism):
         """
