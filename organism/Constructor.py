@@ -36,7 +36,6 @@ class Decoder:
         self._current_gene = None
         self._current_read = b''
         self._current_node = Node()
-        # Create a map for how many bits to read to assemble a function
         self._bits_for_funcs = dict(zip(func_names, bits_needed))
         self._brain_genome = None
         self._current_lobe = None
@@ -56,8 +55,10 @@ class Decoder:
         
     def finish_organism(self):
         """
-        On reading the whole strand, the organism will be finished, and the decoder will be reset
+        On reading the whole strand, the organism will be finished, and the decoder will be reset.
+        :return: The final creature of type Body()
         """
+        # Finalize the last node
         if self._current_organ is not None:
             if self._current_gene is not None:
                 self._current_node.set_noncoding(self._current_read)
@@ -65,9 +66,13 @@ class Decoder:
             else:
                 self._current_organ.set_dna_head(self._current_node)
             self._current_organism.add_organ(self._current_organ)
+        
+        # Read the brain data
         self._current_read=b''
         self.read_brain()
         creature = self._current_organism
+        
+        # Reset internal params
         self._current_organism = Body()
         self._genome = None
         self._brain_genome = None
@@ -80,7 +85,9 @@ class Decoder:
     def read_at_pos(self, pos=None, length = NORMAL_READ_LENGTH):
         """
         Reads a section of Binary DNA, at a starting position and with a length
+        :return: A bytestring that represents the read value from the genome
         """
+        # If no position is specified, get the current position from the class
         if pos == None:
             pos = self._current_pos
         if length == 0:
@@ -88,10 +95,13 @@ class Decoder:
         if pos >= len(self._genome):
             self._current_pos = len(self._genome)
             return b''
+        
+        # If this tries to read beyond the genome, return an empty string
         if pos + length >= len(self._genome):
             self._current_pos = len(self._genome)
             return b''
-            
+        
+        # Read the segment and increment the classes current position
         val = self._genome[pos:(pos+length)]
         if pos == self._current_pos:
             self._current_pos += length
@@ -99,10 +109,13 @@ class Decoder:
 
     def read_genome(self):
         """
-        Continually reads the genome, constructing an organism as it goes.
+        Continually reads the body genome, constructing an organism as it goes.
+        Refactor brain genome into this method
         """
+        # Stop reading if there is only 100 bits left (prevents out of bound read, need better solution)
         while self._current_pos < (len(self._genome)-1)-100:
             read_val = self.read_at_pos()  # Returns a byte string
+
             # If the gene start code was encountered begin constructing a gene, unless no organ exists to house it
             if GENE_LOWER_LIMIT <= int(read_val,2) <= GENE_UPPER_LIMIT and self._current_organ is not None:
                 self.start_new_node('gene') # Finish the previously read node, begin a new one
@@ -114,15 +127,19 @@ class Decoder:
                 self.start_new_node('organ')
                 self._current_node.set_start(read_val)
                 self.read_organ_data()
-                self._current_gene = None # resets the active gene so that we can use this as aflag as well
+                self._current_gene = None # resets the active gene so that we can use this as a flag as well
+
             else:
-                # If a certain value is read in the organs non-coding, add a 'fat storage' unit. Like how fatty it is.
-                if self._current_gene == None and self._current_organ:
+                # If a certain value is read in the organs non-coding section, add a 'fat storage' unit. Like how fatty it is.
+                if self._current_gene == None and self._current_organ: # Make sure it occurs in the noncoding space of an organ, not a gene
                     if ENERGY_LOWER_LIMIT <= int(read_val,2) <= ENERGY_UPPER_LIMIT:
                         self._current_organ.increase_energy_capacity(ENERGY_AMOUNT)
                 self._current_read += read_val
+
+        # Add the remainder of the organisms genome to the read amount.
         if self._current_pos < (len(self._genome)):
             self._current_read += self._genome[self._current_pos:]
+
         # Finalize the organism and return it when complete.
         final = self.finish_organism()
         return final
@@ -149,30 +166,43 @@ class Decoder:
 
     def read_gene_data(self):
         """
-        Constructs a gene (currently only 2 types (emitter, and receptor))) and gets parameters for it.
+        Constructs a gene (currently only 3 types (emitter, receptor, and reaction)) and gets parameters for it.
+        NEEDS REFACTORING. IT"S UGLI
         """
+
         # Find out what type of gene it is
         type = self.read_at_pos(length = GENE_READ_LENGTH)
+
+        # read keeps a running track of what has been read
         read = type
         type = int(type,2) % GENE_TYPES
+
+        # If its a reaction gene
         if type == 2:
-            # It's gonna be easier to separate all the logic into separate functions instead
+            # It's gonna be easier to separate all the logic into separate functions for now
             self._current_gene = Reaction(self._current_organ, 'reaction')
             self.read_reaction_data()
             return
+        
+        # if it's an emitter gene
         elif type == 1:
             self._current_gene = Emitter(self._current_organ, 'emitter')
             rate = self.read_at_pos(length=5)
             read += rate
             self._current_gene.set_output_rate(int(rate,2))
+        
+        # if it's a receptor
         elif type == 0:
             self._current_gene = Receptor(self._current_organ, 'receptor')
         
         # Now parse the function this gene uses. Each function needs different parameters
         func = self.read_at_pos(length = 3)
         read += func
+
+        # Find out which function it is
         func = int(func,2)
         func_name = func_names[func]
+        # Findhow many bits to read for each parameter
         func_read_lengths = bits_needed[func]
         params = []
         # If the function needs parameters, then read each one as needed
@@ -180,6 +210,8 @@ class Decoder:
             val = self.read_at_pos(length = param)
             read += val
             params.append(int(val,2))
+        
+        # construct the unique function from parameters
         if params:
             function = functions[func](*params)
         else:
@@ -191,6 +223,7 @@ class Decoder:
         read += val
         val = int(val,2) % self._current_organ.get_param_numbers()
         p=  self._current_organ._parameters[val]
+        # Give the gene the necessary function to manipulate or read the organs stats
         self._current_gene.set_parameter(p[0], p[1])
         val = self.read_at_pos(length = 4)
         read += val
@@ -203,9 +236,11 @@ class Decoder:
         """
         Reads the data for a reaction gene, need to expand to handle energy?
         """
+        # Start off with the opcode for a reaction gene
         read = b'0010'
         if self._current_pos > len(self._genome)-50:
             return
+
         # Get how many variables on each side of equation
         left = self.read_at_pos(length = 4)
         right = self.read_at_pos(length = 4)
@@ -213,7 +248,8 @@ class Decoder:
         self._current_gene.set_num_of_chems_left(int(left,2))
         self._current_gene.set_num_of_chems_right(int(right,2))
         chems = []
-        # Iterate and get the chems
+
+        # Iterate thorugh and get which chems for each parameter
         for i in range((int(left,2) % 2) + 1 + (int(right,2) % 3)):
             val = self.read_at_pos(length = 6)
             read += val
@@ -226,18 +262,19 @@ class Decoder:
         
     def start_new_node(self, type):
         """
-        Generates a new DNA node
+        Generates a new DNA node, terminating the existing node
         """
-        # Add the noncoding section the current node and establish the next
-        self._current_node.set_noncoding(self._current_read)
-        self._current_node.next = Node()
-        self._current_read = b''
+        # Add the noncoding section the current node and establish the next node
+        if self._current_node is not None:
+            self._current_node.set_noncoding(self._current_read)
+            self._current_node.next = Node()
+            self._current_read = b''
         
         if self._current_organ is None and type != 'lobe':
-            # If organ opcode was encountered but no organ started yet, this is the first node
+            # If organ opcode was encountered but no organ started yet, this is the first node of the entire critter
             self._current_organism.set_dna_head(self._current_node)
 
-        # If organ opcode was encountered and no gene was constructed in the last one, then set this node to the previous organ
+        # If organ opcode was encountered and no gene was constructed in the last one, then assign this node to the previous organ
         elif type == 'organ':
             if self._current_gene is None:
                 self._current_organ.set_dna_head(self._current_node)
@@ -281,9 +318,11 @@ class Decoder:
                 self.start_new_node('lobe') # Finish the previously read node, begin a new one
                 self._current_node.set_start(read_val) # Assign the start value
                 self.read_lobe_data() # Start reading it
+
             else:
                 # SLowly build the noncoding portion
                 self._current_read += read_val
+
         # Tack on the last bit of DNA that was not decoded
         if self._current_pos < (len(self._genome)):
             self._current_read += self._genome[self._current_pos:]
@@ -302,6 +341,7 @@ class Decoder:
         Reads the basic attributes of the brain organ
         """
         read_val = b''
+
         # Get width and layers
         layers = self.read_at_pos(length=1)
         read_val += layers
@@ -339,16 +379,15 @@ class Decoder:
         param = self.read_at_pos(length=6)
         read_val += param
         typer = int(type,2)
+        
         # Parse the read values
         types = [ChemLobe, FoodLobe, FoodChemLobe, EnergyLobe]
         lobe = types[typer%4]()
         lobe.set_owner(self._current_organism)
-        print(int(width,2))
-        print(int(layers,2))
         lobe.set_width_layers((int(width,2)%4) + 1)
         lobe.set_num_layers((int(layers,2) % 3) + 1)
 
-        # Parse parameters
+        # Parse parameters based on type
         if typer%4 == 0 or typer%4 == 2:
             lobe.set_chem(int(param,2) % 16)
         if typer%4 == 1:
@@ -362,6 +401,7 @@ class Decoder:
         for layer in hidden_layers:
             lobe.add_layer(layer)
         
+        # assign the lobe 
         if type == 2:
             self._current_brain.add_food_chem_lobe(lobe)
         elif type == 1:

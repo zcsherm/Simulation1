@@ -83,6 +83,9 @@ class Receptor(BioChemGene):
         return self._organ.get_concentration(self._chemical)
 
     def get_output(self):
+        """
+        Using the assigned activation function, calculates this genes output value
+        """
         return self._activation_function(self.read_input())
         
     def adjust_parameter(self):
@@ -160,7 +163,7 @@ class Emitter(BioChemGene):
 
 class Reaction(BioChemGene):
     """
-    Converts chemicals of one type to another, symbol equation suchas A+B=2C+D
+    Converts chemicals of one type to another, symbol equation suchas A+B=2C+D. Can also create energy.
     """
     def set_num_of_chems_left(self, num):
         """
@@ -194,6 +197,7 @@ class Reaction(BioChemGene):
                 q = self._organ.get_chem_quant(chem[1])
                 if q < chem[0]*(REACTION_MAX)/64:
                     return False
+            # An index greater than 15 implies energy consumption
             else:
                 energy_available = self._organ.get_energy_available()
                 if energy_available < self._chems[i][0]*(ENERGY_REACTION_MAX/64):
@@ -212,6 +216,7 @@ class Reaction(BioChemGene):
                     self._organ.consume_chemical(chem[1], q)
                 else:
                     self._organ.release_chemical(chem[1], q)
+            # An index greater than 15 implies energy creation/consumption
             else:
                 chem = self._chems[i]
                 q = chem[0]*(ENERGY_REACTION_MAX)/64

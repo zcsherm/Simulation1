@@ -32,6 +32,7 @@ params:
 """
 import numpy as np
 from utilities import generate_id
+
 class BrainNode:
     """
     Represents a single node in the neural net
@@ -77,12 +78,21 @@ class Lobe:
         self._id = generate_id()
 
     def set_owner(self, owner):
+        """
+        Sets the organism who has this brain
+        """
         self._owner = owner
 
     def set_dna_head(self, node):
+        """
+        Sets the dna linked list node that corresponds to this node
+        """
         self._dna_head = node
 
     def get_genome(self):
+        """
+        Gets the entire brain genome (from this point)
+        """
         return self._dna_head.get_entire_genome()
         
     def set_final_node(self, node):
@@ -127,15 +137,8 @@ class Lobe:
 
         # Iterate through each layer
         for i in range(self._num_layers):
-            # I believe we can skip this if we allow the final layer to have n outputs and ignore the bottom n-1
-            #if i == self._num_layers - 1:
-            #    outputs = [0]
-            #else:
-            #    outputs = [0 for _ in range(self._width_layers)]
-            
             # Set up the outputs for this layer
             outputs = [0 for _ in range(self._width_layers)]
-            
             # For each node in this layer....
             for j in range(self._width_layers):
                 node = self._hidden[i][j]
@@ -144,7 +147,6 @@ class Lobe:
                 for q in range(len(outs)):
                     # Add each output to the inputs for the next layer
                     outputs[q] += outs[q]
-                    
             inputs = outputs
 
         # For a generic lobe, we only have 1 output, so we grab the topmost output.
@@ -200,6 +202,7 @@ class FoodLobe(Lobe):
         s1 = f"FoodLobe {self._id}:\n"
         s2 = f"\t This lobe has Width: {self._width_layers}, Layers: {self._num_layers}, Direction: {self._direction}\n"
         print(s1, s2)
+
 class FoodChemLobe(Lobe):
     """
     Represents a lobe specialized at reading the concentration of a chemical in a food item
@@ -215,7 +218,6 @@ class FoodChemLobe(Lobe):
         Gets the concentration of a chemical in a food item.
         """
         try:
-            # Maybe change this to proportion instead of full amount
             return food.get_chems()[self._chem]/food.get_size()
         except:
             return 0
@@ -255,6 +257,9 @@ class Brain(Lobe):
         self._genome = None
 
     def add_owner(self, owner):
+        """
+        Sets the organism who controls this brain
+        """
         self._owner = owner
 
     def add_lobe(self, lobe):
@@ -276,6 +281,9 @@ class Brain(Lobe):
         self._sensory_lobes.append(lobe)
 
     def get_lobes(self):
+        """
+        Returns all lobes in this brain
+        """
         return self._lobes
 
     def input_action(self, val=None):
@@ -293,10 +301,12 @@ class Brain(Lobe):
         """
         Gets the final outputs of the brains learnable NN
         """
+        # Get the total output from each lobe and apply that to the first layer
         if debug is False:
             inputs = [self.input_action() for i in range(self._width_layers)]
         else:
             inputs = [debug for i in range(self._width_layers)]
+        # Carry the input forward and find the outputs
         for i in range(self._num_layers):
             outputs = [0 for _ in range(self._width_layers)]
             for j in range(self._width_layers):
@@ -321,6 +331,8 @@ class Brain(Lobe):
         print(s1, s2, s3)
         for lobe in self._lobes:
             lobe.describe()
+
+# Functions for node activation in neural nets
 
 def linr(input):
     return input

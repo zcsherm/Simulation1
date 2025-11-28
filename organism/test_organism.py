@@ -433,4 +433,8 @@ class FourthTest(unittest.TestCase):
             lengths_brain.append(new_child.get_brain().get_genome())
         # Might be good to chart this
         print(f"Genome lengths: {lengths_genome}")
+        plt.plot(lengths_genome)
+        plt.show()
         print(f"Brain lengths: {lengths_brain}")
+        plt.plot(lengths_brain)
+        plt.show()

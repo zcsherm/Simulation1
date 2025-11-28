@@ -4,6 +4,9 @@ A simple structure for prototyping
 from utilities import *
 
 class Organ:
+    """
+    Represents an organ which is a container for a set of genes. Each Organ has a health, energy capacity, and other parameters
+    """
     def __init__(self, type, owner):
         # Should probably have the owner referenced by ID to save space, then have a get_owner_by_id() to get the actual organism
         self._genes = []
@@ -14,30 +17,54 @@ class Organ:
         self._energy_capacity = 1
         
     def set_energy_capacity(self, number):
+        """
+        Sets the max energy this organ can store
+        """
         self._energy_capacity = number
 
     def get_energy_capacity(self):
+        """
+        Gets the energy this organ stores
+        """
         return self._energy_capacity
 
     def get_energy_available(self):
+        """
+        Gets the energy the organism has
+        """
         return self._owner.get_energy()
 
     def consume_energy(self, amount):
+        """
+        Consumes the organisms energy
+        """
         self._owner.remove_energy(amount)
 
     def release_energy(self, amount):
+        """
+        Releases energy to the organism
+        """
         self._owner.add_energy(amount)
 
     def increase_energy_capacity(self, val):
+        """
+        Increments energy capacity by the provided value
+        """
         self._energy_capacity += val
         
     def set_dna_head(self, node):
+        """
+        Sets the DNA node for this organ
+        """
         self._dna_head = node
 
     def get_dna_head(self):
         return self._dna_head
         
     def get_genome(self):
+        """
+        Gets the genome from this organ on
+        """
         if self._dna_head is not None:
             return self._dna_head.get_entire_genome()
         return None
@@ -58,17 +85,22 @@ class InternalOrgan(Organ):
         """
         self._health = val
         self._health_receptors = []
+        # Pairs the parameter name and the function to modify
         self._parameters.append(('health', self.health_adjust))
     
     def set_act_rate(self, act_rate):
         """
-        Determines how often this organ is activated
+        Sets the activation rate for this organ (how often it gets activated by the owner)
         """
         self._act_rate = act_rate
         self._act_rate_receptors = []
+        # Pairs the parameter name and the function to modify
         self._parameters.append(('activation rate', self.act_rate_adjust))
 
     def set_reaction_rate(self, rate):
+        """
+        Sets the reaction rate for this organ
+        """
         self._reaction_rate = rate
         self._reaction_rate_receptors = []
         self._parameters.append(('reaction rate', self.reaction_rate_adjust))
